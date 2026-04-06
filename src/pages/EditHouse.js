@@ -1,9 +1,11 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { createHouse, improveDescription, isLoggedIn } from "../api";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { getHouse, updateHouse, improveDescription, isLoggedIn } from "../api";
 import "./AddHouse.css";
 
-function AddHouse() {
+function EditHouse() {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     title: "",
     location: "",
@@ -13,19 +15,38 @@ function AddHouse() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
   const [aiLoading, setAiLoading] = useState(false);
-  const navigate = useNavigate();
+
+  useEffect(() => {
+    getHouse(id)
+      .then((data) => {
+        setForm({
+          title: data.title,
+          location: data.location,
+          price: data.price,
+          type: data.type,
+          description: data.description,
+        });
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setFetching(false));
+  }, [id]);
 
   if (!isLoggedIn()) {
     return (
       <div className="page">
         <div className="card">
-          <h1>Add New House</h1>
-          <p style={{ color: "#ef4444" }}>You must be logged in to add a house.</p>
+          <h1>Edit House</h1>
+          <p style={{ color: "#ef4444" }}>You must be logged in.</p>
           <button className="submit-btn" onClick={() => navigate("/login")}>Go to Login</button>
         </div>
       </div>
     );
+  }
+
+  if (fetching) {
+    return <div className="page"><div className="card"><p>Loading...</p></div></div>;
   }
 
   const handleChange = (e) => {
@@ -39,8 +60,8 @@ function AddHouse() {
 
     try {
       const house = { ...form, price: Number(form.price) };
-      const data = await createHouse(house);
-      navigate(`/house/${data._id}`);
+      await updateHouse(id, house);
+      navigate(`/house/${id}`);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -50,7 +71,7 @@ function AddHouse() {
 
   const handleImprove = async () => {
     if (!form.description.trim()) {
-      setError("Write a description first, then improve it with AI.");
+      setError("Write a description first.");
       return;
     }
     setError("");
@@ -69,7 +90,7 @@ function AddHouse() {
   return (
     <div className="page">
       <div className="card">
-        <h1>Add New House</h1>
+        <h1>Edit House</h1>
 
         {error && <p style={{ color: "#ef4444" }}>{error}</p>}
 
@@ -97,13 +118,20 @@ function AddHouse() {
               {aiLoading ? "Improving..." : "Improve"}
             </button>
             <button type="submit" className="submit-btn" disabled={loading}>
-              {loading ? "Adding..." : "Add House"}
+              {loading ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </form>
+
+        <button
+          style={{ marginTop: "10px", background: "transparent", color: "#c4b5fd", border: "none", cursor: "pointer" }}
+          onClick={() => navigate(`/house/${id}`)}
+        >
+          Cancel
+        </button>
       </div>
     </div>
   );
 }
 
-export default AddHouse;
+export default EditHouse;
