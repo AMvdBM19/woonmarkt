@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getHouses, isLoggedIn, clearAuth, getUser } from "../api";
+import HouseCard from "../components/HouseCard";
 import "./Home.css";
 
 function Home() {
@@ -15,11 +16,8 @@ function Home() {
 
   const fetchHouses = (params = {}) => {
     setLoading(true);
-    const query = {};
-    if (params.location) query.location = params.location;
-    if (params.type) query.type = params.type;
 
-    getHouses(query)
+    getHouses(params)
       .then((data) => setHouses(data))
       .catch(() => setHouses([]))
       .finally(() => setLoading(false));
@@ -41,18 +39,33 @@ function Home() {
 
   return (
     <div className="home">
-
       <nav className="nav">
-        <h2><Link to="/" style={{ color: "inherit", textDecoration: "none" }}>WoonMarkt</Link></h2>
+        <h2>
+          <Link to="/" style={{ color: "inherit", textDecoration: "none" }}>
+            WoonMarkt
+          </Link>
+        </h2>
+
         <div className="nav-links">
           {loggedIn && <span>Hi, {user?.name}</span>}
-          {loggedIn && <Link to="/add" style={{ color: "white" }}>Add Listing</Link>}
+          {loggedIn && (
+            <Link to="/add" style={{ color: "white" }}>
+              Add Listing
+            </Link>
+          )}
+
           {loggedIn ? (
-            <span onClick={handleLogout} style={{ cursor: "pointer" }}>Logout</span>
+            <span onClick={handleLogout} style={{ cursor: "pointer" }}>
+              Logout
+            </span>
           ) : (
             <>
-              <Link to="/login" style={{ color: "white" }}>Login</Link>
-              <Link to="/register" style={{ color: "white" }}>Register</Link>
+              <Link to="/login" style={{ color: "white" }}>
+                Login
+              </Link>
+              <Link to="/register" style={{ color: "white" }}>
+                Register
+              </Link>
             </>
           )}
         </div>
@@ -70,41 +83,33 @@ function Home() {
             value={city}
             onChange={(e) => setCity(e.target.value)}
           />
+
           <select value={type} onChange={(e) => setType(e.target.value)}>
             <option value="">All Types</option>
             <option value="rent">Rent</option>
             <option value="sale">Sale</option>
             <option value="exchange">Exchange</option>
           </select>
+
           <button onClick={handleSearch}>Search</button>
         </div>
       </section>
 
       <section className="section">
-        <h2>Listings {houses.length > 0 && `(${houses.length})`}</h2>
+        <h2>Available Homes ({houses.length})</h2>
 
-        {loading && <p>Loading...</p>}
+        {loading && <p>Loading homes...</p>}
 
         {!loading && houses.length === 0 && (
-          <p>No houses found. {loggedIn ? <Link to="/add" style={{ color: "#8b5cf6" }}>Add the first one!</Link> : "Log in to add a listing."}</p>
+          <p>No houses found.</p>
         )}
 
         <div className="grid">
           {houses.map((house) => (
-            <div className="card" key={house._id} onClick={() => navigate(`/house/${house._id}`)} style={{ cursor: "pointer" }}>
-              <div className="img"></div>
-
-              <div className="content">
-                <h3>{house.title}</h3>
-                <p>{house.location}</p>
-                <p className="price">{house.price} ({house.type})</p>
-                <button onClick={(e) => { e.stopPropagation(); navigate(`/house/${house._id}`); }}>View</button>
-              </div>
-            </div>
+            <HouseCard key={house._id} house={house} />
           ))}
         </div>
       </section>
-
     </div>
   );
 }

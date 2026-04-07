@@ -1,8 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function HouseCard({ house }) {
+  const navigate = useNavigate();
+  const [hover, setHover] = useState(false);
+
   return (
-    <div style={styles.card}>
+    <div
+      style={{
+        ...styles.card,
+        ...(hover ? styles.cardHover : {}),
+      }}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onClick={() => navigate(`/house/${house._id}`)}
+    >
       <img
         src="https://images.unsplash.com/photo-1568605114967-8130f3a36994"
         alt="house"
@@ -13,11 +25,19 @@ function HouseCard({ house }) {
         <h3>{house.title}</h3>
         <p style={styles.location}>{house.location}</p>
 
-        <p style={styles.swap}>
-          <strong>Swap for:</strong> {house.swap}
+        <p style={styles.price}>
+          €{house.price} / {house.type}
         </p>
 
-        <button style={styles.button}>View Details</button>
+        <button
+          style={styles.button}
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/house/${house._id}`);
+          }}
+        >
+          View Details
+        </button>
       </div>
     </div>
   );
@@ -33,23 +53,33 @@ const styles = {
     color: "white",
     boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
     transition: "0.3s",
+    cursor: "pointer",
   },
+
+  cardHover: {
+    transform: "scale(1.05) translateY(-5px)",
+  },
+
   image: {
     width: "100%",
     height: "160px",
     objectFit: "cover",
   },
+
   content: {
     padding: "15px",
   },
+
   location: {
     color: "#c4b5fd",
     fontSize: "14px",
   },
-  swap: {
+
+  price: {
     marginTop: "10px",
-    fontSize: "14px",
+    fontWeight: "bold",
   },
+
   button: {
     marginTop: "15px",
     width: "100%",
