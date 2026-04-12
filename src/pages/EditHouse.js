@@ -13,12 +13,19 @@ function EditHouse() {
     type: "rent",
     description: "",
   });
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
+    if (!isLoggedIn()) {
+      navigate("/login");
+      return;
+    }
+
     getHouse(id)
       .then((data) => {
         setForm({
@@ -28,22 +35,13 @@ function EditHouse() {
           type: data.type,
           description: data.description,
         });
+        if (data.image) {
+          setPreview(`/uploads/${data.image}`);
+        }
       })
       .catch((err) => setError(err.message))
       .finally(() => setFetching(false));
-  }, [id]);
-
-  if (!isLoggedIn()) {
-    return (
-      <div className="page">
-        <div className="card">
-          <h1>Edit House</h1>
-          <p style={{ color: "#ef4444" }}>You must be logged in.</p>
-          <button className="submit-btn" onClick={() => navigate("/login")}>Go to Login</button>
-        </div>
-      </div>
-    );
-  }
+  }, [id, navigate]);
 
   if (fetching) {
     return <div className="page"><div className="card"><p>Loading...</p></div></div>;
@@ -53,14 +51,33 @@ function EditHouse() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleImage = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (!form.title || !form.location || !form.price || !form.description) {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    if (Number(form.price) <= 0) {
+      setError("Price must be greater than 0");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const house = { ...form, price: Number(form.price) };
-      await updateHouse(id, house);
+      await updateHouse(id, house, image);
       navigate(`/house/${id}`);
     } catch (err) {
       setError(err.message);
@@ -104,6 +121,14 @@ function EditHouse() {
             <option value="sale">Sale</option>
             <option value="exchange">Exchange</option>
           </select>
+
+          <div className="image-upload">
+            <label className="image-label">
+              {preview ? "Change Image" : "Upload Image"}
+              <input type="file" accept="image/*" onChange={handleImage} hidden />
+            </label>
+            {preview && <img src={preview} alt="Preview" className="image-preview" />}
+          </div>
 
           <textarea
             name="description"

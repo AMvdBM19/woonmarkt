@@ -1,70 +1,101 @@
-# Getting Started with Create React App
+# WoonMarkt
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A full-stack house marketplace where users can list homes for rent, sale, or exchange. Built with React, Node.js, Express, and MongoDB.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- User registration and login with JWT authentication
+- Create, edit, and delete house listings
+- Upload images for listings
+- Search and filter houses by city and type
+- AI-powered natural language search (e.g. "cheap house in Rotterdam for rent")
+- AI description improvement for listings
+- Responsive UI with glassmorphism design
 
-### `npm start`
+## Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+**Frontend:** React 19, React Router 7
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+**Backend:** Node.js, Express, MongoDB, Mongoose, JWT, Multer
 
-### `npm test`
+**AI:** OpenAI API (GPT-3.5-turbo)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Getting Started
 
-### `npm run build`
+### Prerequisites
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Node.js (v18+)
+- MongoDB Atlas account (or local MongoDB)
+- OpenAI API key
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 1. Install dependencies
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+# Frontend (from root)
+npm install
 
-### `npm run eject`
+# Backend
+cd backend
+npm install
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 2. Set up environment variables
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+cd backend
+cp .env.example .env
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Edit `backend/.env` with your MongoDB URI, JWT secret, and OpenAI API key.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### 3. Run the app
 
-## Learn More
+Open two terminals:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```bash
+# Terminal 1 - Backend
+cd backend
+npm run dev
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+# Terminal 2 - Frontend (from root)
+npm start
+```
 
-### Code Splitting
+Frontend runs on `http://localhost:3000`, backend on `http://localhost:3001`.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Project Structure
 
-### Analyzing the Bundle Size
+```
+woonmarkt/
+├── backend/
+│   ├── controllers/     # Route handlers
+│   ├── middleware/       # Auth middleware
+│   ├── models/          # Mongoose schemas
+│   ├── routes/          # API routes
+│   ├── uploads/         # Uploaded images
+│   └── server.js        # Entry point
+├── src/
+│   ├── components/      # Navbar, HouseCard
+│   ├── pages/           # Home, Login, Register, AddHouse, EditHouse, HouseDetails, Listings
+│   ├── api.js           # API helper functions
+│   ├── App.js           # Router setup
+│   └── index.js         # Entry point
+└── public/
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## API Endpoints
 
-### Making a Progressive Web App
+### Auth
+- `POST /api/auth/register` - Create account
+- `POST /api/auth/login` - Login
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### Houses
+- `GET /api/houses` - Get all houses (supports `?type=` and `?location=` filters)
+- `GET /api/houses/:id` - Get single house
+- `POST /api/houses` - Create listing (auth required, supports image upload)
+- `PUT /api/houses/:id` - Update listing (owner only)
+- `DELETE /api/houses/:id` - Delete listing (owner only)
 
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### AI
+- `POST /api/ai/improve-description` - Improve a house description
+- `POST /api/ai/search` - Natural language search

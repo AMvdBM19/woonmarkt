@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { getHouses, isLoggedIn, clearAuth, getUser } from "../api";
+import { getHouses, aiSearch } from "../api";
 import HouseCard from "../components/HouseCard";
 import "./Home.css";
 
@@ -9,10 +8,9 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [city, setCity] = useState("");
   const [type, setType] = useState("");
-  const navigate = useNavigate();
-
-  const loggedIn = isLoggedIn();
-  const user = getUser();
+  const [aiQuery, setAiQuery] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiFilters, setAiFilters] = useState(null);
 
   const fetchHouses = (params = {}) => {
     setLoading(true);
@@ -28,49 +26,34 @@ function Home() {
   }, []);
 
   const handleSearch = () => {
+    setAiFilters(null);
     fetchHouses({ location: city, type });
   };
 
-  const handleLogout = () => {
-    clearAuth();
-    navigate("/");
-    window.location.reload();
+  const handleAiSearch = async () => {
+    if (!aiQuery.trim()) return;
+    setAiLoading(true);
+    setAiFilters(null);
+
+    try {
+      const data = await aiSearch(aiQuery);
+      setHouses(data.houses);
+      setAiFilters(data.filters);
+    } catch (err) {
+      setHouses([]);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const clearAiSearch = () => {
+    setAiQuery("");
+    setAiFilters(null);
+    fetchHouses();
   };
 
   return (
     <div className="home">
-      <nav className="nav">
-        <h2>
-          <Link to="/" style={{ color: "inherit", textDecoration: "none" }}>
-            WoonMarkt
-          </Link>
-        </h2>
-
-        <div className="nav-links">
-          {loggedIn && <span>Hi, {user?.name}</span>}
-          {loggedIn && (
-            <Link to="/add" style={{ color: "white" }}>
-              Add Listing
-            </Link>
-          )}
-
-          {loggedIn ? (
-            <span onClick={handleLogout} style={{ cursor: "pointer" }}>
-              Logout
-            </span>
-          ) : (
-            <>
-              <Link to="/login" style={{ color: "white" }}>
-                Login
-              </Link>
-              <Link to="/register" style={{ color: "white" }}>
-                Register
-              </Link>
-            </>
-          )}
-        </div>
-      </nav>
-
       <section className="hero">
         <div className="glow"></div>
 
@@ -92,6 +75,32 @@ function Home() {
           </select>
 
           <button onClick={handleSearch}>Search</button>
+        </div>
+
+        <div className="ai-search">
+          <p className="ai-search-label">Or search with AI</p>
+          <div className="ai-search-box">
+            <input
+              placeholder='Try "affordable house in Rotterdam for rent"'
+              value={aiQuery}
+              onChange={(e) => setAiQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAiSearch()}
+            />
+            <button onClick={handleAiSearch} disabled={aiLoading}>
+              {aiLoading ? "Searching..." : "AI Search"}
+            </button>
+          </div>
+
+          {aiFilters && (
+            <div className="ai-filters">
+              <span>AI found filters: </span>
+              {aiFilters.location && <span className="ai-tag">{aiFilters.location}</span>}
+              {aiFilters.type && <span className="ai-tag">{aiFilters.type}</span>}
+              {aiFilters.minPrice && <span className="ai-tag">Min &euro;{aiFilters.minPrice}</span>}
+              {aiFilters.maxPrice && <span className="ai-tag">Max &euro;{aiFilters.maxPrice}</span>}
+              <button className="ai-clear" onClick={clearAiSearch}>Clear</button>
+            </div>
+          )}
         </div>
       </section>
 

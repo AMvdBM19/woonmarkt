@@ -13,6 +13,12 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (!email || !password) {
+      setError("Please fill in all fields");
+      return;
+    }
+
     setLoading(true);
 
     try {

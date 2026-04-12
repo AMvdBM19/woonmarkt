@@ -27,13 +27,14 @@ const register = async (req, res) => {
     res.status(201).json({
       token,
       user: {
-        id: user._id,
+        _id: user._id,
         name: user.name,
         email: user.email,
       },
     });
   } catch (err) {
-    res.status(500).json({ message: 'Something went wrong' });
+    console.log(err.message);
+    res.status(500).json({ message: 'Server error during registration' });
   }
 };
 
@@ -66,13 +67,14 @@ const login = async (req, res) => {
     res.json({
       token,
       user: {
-        id: user._id,
+        _id: user._id,
         name: user.name,
         email: user.email,
       },
     });
   } catch (err) {
-    res.status(500).json({ message: 'Something went wrong' });
+    console.log(err.message);
+    res.status(500).json({ message: 'Server error during login' });
   }
 };
 

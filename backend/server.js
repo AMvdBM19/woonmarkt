@@ -3,22 +3,23 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 
+const path = require('path');
+
 const authRoutes = require('./routes/authRoutes');
 const houseRoutes = require('./routes/houseRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Routes
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.use('/api/auth', authRoutes);
 app.use('/api/houses', houseRoutes);
 app.use('/api/ai', aiRoutes);
 
-// Connect to MongoDB, then start the server
 const PORT = process.env.PORT || 3001;
 
 mongoose
