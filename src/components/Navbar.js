@@ -1,43 +1,45 @@
 import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { isLoggedIn, getUser, clearAuth } from "../api";
+import "./Navbar.css";
 
 function Navbar() {
-  return (
-    <div style={styles.nav}>
-      <h2 style={styles.logo}>Home Swap Finder</h2>
+  const navigate = useNavigate();
+  const loggedIn = isLoggedIn();
+  const user = getUser();
 
-      <div style={styles.links}>
-        <span>Browse Listings</span>
-        <span>AI Match</span>
-        <button style={styles.button}>Log In</button>
+  const handleLogout = () => {
+    clearAuth();
+    navigate("/");
+    window.location.reload();
+  };
+
+  return (
+    <nav className="navbar">
+      <h2>
+        <Link to="/" className="navbar-logo">WoonMarkt</Link>
+      </h2>
+
+      <div className="navbar-links">
+        <Link to="/">Home</Link>
+        <Link to="/listings">Listings</Link>
+
+        {loggedIn && <Link to="/add">Add Listing</Link>}
+
+        {loggedIn ? (
+          <>
+            <span className="navbar-user">Hi, {user?.name}</span>
+            <span className="navbar-logout" onClick={handleLogout}>Logout</span>
+          </>
+        ) : (
+          <>
+            <Link to="/login">Login</Link>
+            <Link to="/register">Register</Link>
+          </>
+        )}
       </div>
-    </div>
+    </nav>
   );
 }
-
-const styles = {
-  nav: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "20px 40px",
-    color: "white",
-  },
-  logo: {
-    fontWeight: "bold",
-  },
-  links: {
-    display: "flex",
-    gap: "25px",
-    alignItems: "center",
-  },
-  button: {
-    padding: "8px 16px",
-    borderRadius: "8px",
-    border: "none",
-    background: "#8b5cf6",
-    color: "white",
-    cursor: "pointer",
-  },
-};
 
 export default Navbar;

@@ -6,27 +6,6 @@
 }
 
 
-.nav {
-  display: flex;
-  justify-content: space-between;
-  padding: 20px 60px;
-  backdrop-filter: blur(20px);
-  background: rgba(255,255,255,0.05);
-}
-
-.nav-links {
-  display: flex;
-  gap: 25px;
-}
-
-.nav-links span {
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.nav-links span:hover {
-  color: #c084fc;
-}
 
 .hero {
   text-align: center;
@@ -47,9 +26,7 @@
 
 .hero h1 {
   font-size: 60px;
-  background: linear-gradient(90deg, #c084fc, #8b5cf6, #7c3aed);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: white;
 }
 
 .hero p {
@@ -93,6 +70,91 @@
   box-shadow: 0 0 20px #8b5cf6;
 }
 
+
+.ai-search {
+  margin-top: 30px;
+}
+
+.ai-search-label {
+  color: #c4b5fd;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.ai-search-box {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 15px;
+  border-radius: 20px;
+}
+
+.ai-search-box input {
+  flex: 1;
+  max-width: 400px;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+}
+
+.ai-search-box button {
+  padding: 12px 25px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.ai-search-box button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px #22c55e;
+}
+
+.ai-search-box button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.ai-filters {
+  margin-top: 15px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  color: #c4b5fd;
+  font-size: 14px;
+}
+
+.ai-tag {
+  background: rgba(139, 92, 246, 0.3);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  color: white;
+}
+
+.ai-clear {
+  background: transparent;
+  border: 1px solid #8b5cf6;
+  color: #c4b5fd;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.ai-clear:hover {
+  background: rgba(139, 92, 246, 0.2);
+}
 
 .section {
   margin-top: 80px;

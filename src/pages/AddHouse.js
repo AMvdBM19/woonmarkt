@@ -11,35 +11,49 @@ function AddHouse() {
     type: "rent",
     description: "",
   });
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const navigate = useNavigate();
 
   if (!isLoggedIn()) {
-    return (
-      <div className="page">
-        <div className="card">
-          <h1>Add New House</h1>
-          <p style={{ color: "#ef4444" }}>You must be logged in to add a house.</p>
-          <button className="submit-btn" onClick={() => navigate("/login")}>Go to Login</button>
-        </div>
-      </div>
-    );
+    navigate("/login");
+    return null;
   }
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleImage = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (!form.title || !form.location || !form.price || !form.description) {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    if (Number(form.price) <= 0) {
+      setError("Price must be greater than 0");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const house = { ...form, price: Number(form.price) };
-      const data = await createHouse(house);
+      const data = await createHouse(house, image);
       navigate(`/house/${data._id}`);
     } catch (err) {
       setError(err.message);
@@ -83,6 +97,14 @@ function AddHouse() {
             <option value="sale">Sale</option>
             <option value="exchange">Exchange</option>
           </select>
+
+          <div className="image-upload">
+            <label className="image-label">
+              {preview ? "Change Image" : "Upload Image"}
+              <input type="file" accept="image/*" onChange={handleImage} hidden />
+            </label>
+            {preview && <img src={preview} alt="Preview" className="image-preview" />}
+          </div>
 
           <textarea
             name="description"

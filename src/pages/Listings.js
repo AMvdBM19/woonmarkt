@@ -1,27 +1,35 @@
 import { useEffect, useState } from "react";
-import { getHouses } from "../services/api";
+import { getHouses } from "../api";
 import HouseCard from "../components/HouseCard";
+import "./Home.css";
 
 function Listings() {
   const [houses, setHouses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    getHouses().then(setHouses);
+    getHouses()
+      .then((data) => setHouses(data))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
   }, []);
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>All Houses</h1>
+    <div className="home">
+      <section className="section" style={{ marginTop: "40px" }}>
+        <h2>All Listings ({houses.length})</h2>
 
-      <div style={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: "20px"
-      }}>
-        {houses.map((house) => (
-          <HouseCard key={house._id} house={house} />
-        ))}
-      </div>
+        {loading && <p>Loading...</p>}
+        {error && <p style={{ color: "#ef4444" }}>{error}</p>}
+        {!loading && !error && houses.length === 0 && <p>No houses found.</p>}
+
+        <div className="grid">
+          {houses.map((house) => (
+            <HouseCard key={house._id} house={house} />
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getHouse, deleteHouse, getUser, isLoggedIn } from "../api";
 import "./HouseDetails.css";
 
+const fallbackImage = "https://images.unsplash.com/photo-1568605114967-8130f3a36994";
+
 function HouseDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -34,21 +36,18 @@ function HouseDetails() {
   if (!house) return <div className="details-page"><p>House not found.</p></div>;
 
   const isOwner = isLoggedIn() && user && house.owner && user._id === (house.owner._id || house.owner);
+  const imageSrc = house.image ? `/uploads/${house.image}` : fallbackImage;
 
   return (
     <div className="details-page">
-      <button className="btn" onClick={() => navigate(-1)}>
-        Back
-      </button>
-
       <div className="details-container">
-        <div className="details-image"></div>
+        <img src={imageSrc} alt={house.title} className="details-image" />
 
         <div className="details-info">
           <h1>{house.title}</h1>
           <p className="location">{house.location}</p>
           <p className="price">
-            {house.price} / {house.type}
+            &euro;{house.price} / {house.type}
           </p>
 
           <p className="description">{house.description}</p>
