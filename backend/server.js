@@ -11,8 +11,15 @@ const aiRoutes = require('./routes/aiRoutes');
 
 const app = express();
 
-app.use(cors());
+const corsOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',')
+  : '*';
+app.use(cors({ origin: corsOrigins }));
 app.use(express.json());
+
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 

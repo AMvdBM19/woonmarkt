@@ -1,0 +1,61 @@
+services:
+  woonmarkt-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: woonmarkt-frontend
+    restart: unless-stopped
+    networks:
+      - woonmarkt
+      - web
+    depends_on:
+      woonmarkt-backend:
+        condition: service_healthy
+
+  woonmarkt-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: woonmarkt-backend
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "3010:3001"
+    networks:
+      - woonmarkt
+    depends_on:
+      woonmarkt-mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    volumes:
+      - woonmarkt-uploads:/app/uploads
+
+  woonmarkt-mongo:
+    image: mongo:7
+    container_name: woonmarkt-mongo
+    restart: unless-stopped
+    networks:
+      - woonmarkt
+    volumes:
+      - woonmarkt-mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok", "--quiet"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+volumes:
+  woonmarkt-mongo-data:
+  woonmarkt-uploads:
+
+networks:
+  woonmarkt:
+    driver: bridge
+  web:
+    external: true
