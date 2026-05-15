@@ -36,14 +36,15 @@ function Login() {
     <div className="login-page">
       <div className="login-card">
         <h1>Welcome Back</h1>
+        <p className="login-subtitle">Sign in to manage your properties</p>
 
-        {error && <p style={{ color: "#ef4444" }}>{error}</p>}
+        {error && <p style={{ color: "#ef4444", fontSize: "14px" }}>{error}</p>}
 
         <form onSubmit={handleSubmit}>
           <input
             className="login-input"
             type="email"
-            placeholder="Email"
+            placeholder="Email address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -59,14 +60,13 @@ function Login() {
           />
 
           <button className="login-btn" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
 
-        <p style={{ marginTop: "15px" }}>
-          No account? <Link to="/register" style={{ color: "#8b5cf6" }}>Register</Link>
+        <p className="login-link">
+          Don't have an account? <Link to="/register">Register</Link>
         </p>
-        <p><Link to="/" style={{ color: "#c4b5fd" }}>Back to Home</Link></p>
       </div>
     </div>
   );

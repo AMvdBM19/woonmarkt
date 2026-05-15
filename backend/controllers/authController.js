@@ -33,7 +33,7 @@ const register = async (req, res) => {
       },
     });
   } catch (err) {
-    console.log(err.message);
+    console.error('[Auth]', err.message);
     res.status(500).json({ message: 'Server error during registration' });
   }
 };
@@ -73,7 +73,7 @@ const login = async (req, res) => {
       },
     });
   } catch (err) {
-    console.log(err.message);
+    console.error('[Auth]', err.message);
     res.status(500).json({ message: 'Server error during login' });
   }
 };

@@ -1,61 +1,99 @@
-services:
-  woonmarkt-frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: woonmarkt-frontend
-    restart: unless-stopped
-    networks:
-      - woonmarkt
-      - web
-    depends_on:
-      woonmarkt-backend:
-        condition: service_healthy
+version: "3.9"
 
+services:
+  # Backend API Service
   woonmarkt-backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: ../Dockerfile.backend
     container_name: woonmarkt-backend
     restart: unless-stopped
-    env_file: .env
+    environment:
+      MONGO_URI: ${MONGO_URI:-mongodb://woonmarkt-mongo:27017/house-marketplace}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?OPENAI_API_KEY is required}
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
+      PORT: 3001
+      NODE_ENV: production
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://woonmarkt.monoliet.cloud,http://localhost:3000}
     ports:
       - "3010:3001"
-    networks:
-      - woonmarkt
+    volumes:
+      - woonmarkt-uploads:/app/uploads
     depends_on:
       woonmarkt-mongo:
         condition: service_healthy
+    networks:
+      - woonmarkt-network
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
-      interval: 15s
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
       timeout: 5s
-      retries: 5
-      start_period: 20s
-    volumes:
-      - woonmarkt-uploads:/app/uploads
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
+  # Frontend Web Service
+  woonmarkt-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        REACT_APP_API_URL: /api
+        REACT_APP_GOOGLE_MAPS_KEY: ${GOOGLE_MAPS_API_KEY:-}
+    container_name: woonmarkt-frontend
+    restart: unless-stopped
+    ports:
+      - "3011:80"
+    depends_on:
+      - woonmarkt-backend
+    networks:
+      - woonmarkt-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # MongoDB Database
   woonmarkt-mongo:
     image: mongo:7
     container_name: woonmarkt-mongo
     restart: unless-stopped
-    networks:
-      - woonmarkt
+    environment:
+      MONGO_INITDB_DATABASE: house-marketplace
     volumes:
-      - woonmarkt-mongo-data:/data/db
+      - woonmarkt-mongo-db:/data/db
+    networks:
+      - woonmarkt-network
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok", "--quiet"]
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 15s
-
-volumes:
-  woonmarkt-mongo-data:
-  woonmarkt-uploads:
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 networks:
-  woonmarkt:
+  woonmarkt-network:
     driver: bridge
-  web:
-    external: true
+
+volumes:
+  woonmarkt-uploads:
+    driver: local
+  woonmarkt-mongo-db:
+    driver: local

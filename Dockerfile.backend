@@ -1,0 +1,48 @@
+# Multi-stage Dockerfile for WoonMarkt Backend
+# Stage 1: Dependencies
+FROM node:20-alpine AS dependencies
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Stage 2: Build (with dev dependencies for any build steps)
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+
+# Stage 3: Production Runtime
+FROM node:20-alpine AS runtime
+WORKDIR /app
+
+# Install dumb-init to handle signals properly
+RUN apk add --no-cache dumb-init curl
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
+
+# Copy production dependencies from stage 1
+COPY --from=dependencies --chown=nodejs:nodejs /app/node_modules ./node_modules
+
+# Copy application code
+COPY --chown=nodejs:nodejs . .
+
+# Create uploads directory with proper permissions
+RUN mkdir -p uploads && chown -R nodejs:nodejs uploads
+
+# Switch to non-root user
+USER nodejs
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD curl -f http://localhost:3001/health || exit 1
+
+# Use dumb-init to handle signals
+ENTRYPOINT ["/sbin/dumb-init", "--"]
+
+# Start the application
+CMD ["node", "server.js"]
+
+LABEL maintainer="Andres"
+LABEL description="WoonMarkt Backend - House Marketplace API"
+LABEL version="1.0.0"

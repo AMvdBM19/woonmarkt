@@ -8,9 +8,15 @@ function AddHouse() {
     title: "",
     location: "",
     price: "",
-    type: "rent",
+    type: "sale",
     description: "",
+    bedrooms: "",
+    bathrooms: "",
+    sqm: "",
+    yearBuilt: "",
   });
+  const [amenities, setAmenities] = useState([]);
+  const [amenityInput, setAmenityInput] = useState("");
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [error, setError] = useState("");
@@ -35,24 +41,34 @@ function AddHouse() {
     }
   };
 
+  const addAmenity = () => {
+    if (amenityInput.trim() && !amenities.includes(amenityInput.trim())) {
+      setAmenities([...amenities, amenityInput.trim()]);
+      setAmenityInput("");
+    }
+  };
+
+  const removeAmenity = (index) => {
+    setAmenities(amenities.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     if (!form.title || !form.location || !form.price || !form.description) {
-      setError("Please fill in all fields");
-      return;
-    }
-
-    if (Number(form.price) <= 0) {
-      setError("Price must be greater than 0");
+      setError("Please fill in all required fields");
       return;
     }
 
     setLoading(true);
 
     try {
-      const house = { ...form, price: Number(form.price) };
+      const house = {
+        ...form,
+        price: Number(form.price),
+        amenities: JSON.stringify(amenities),
+      };
       const data = await createHouse(house, image);
       navigate(`/house/${data._id}`);
     } catch (err) {
@@ -82,33 +98,69 @@ function AddHouse() {
 
   return (
     <div className="page">
-      <div className="card">
-        <h1>Add New House</h1>
+      <div className="form-card">
+        <h1>List a Property</h1>
+        <p className="form-subtitle">Add a new luxury property to our collection</p>
 
-        {error && <p style={{ color: "#ef4444" }}>{error}</p>}
+        {error && <p className="form-error">{error}</p>}
 
         <form onSubmit={handleSubmit}>
-          <input name="title" placeholder="Title" value={form.title} onChange={handleChange} required />
-          <input name="location" placeholder="Location" value={form.location} onChange={handleChange} required />
-          <input name="price" placeholder="Price" type="number" value={form.price} onChange={handleChange} required />
+          <input name="title" placeholder="Property title" value={form.title} onChange={handleChange} required />
+          <input name="location" placeholder="Full address" value={form.location} onChange={handleChange} required />
 
-          <select name="type" value={form.type} onChange={handleChange}>
-            <option value="rent">Rent</option>
-            <option value="sale">Sale</option>
-            <option value="exchange">Exchange</option>
-          </select>
+          <div className="form-row">
+            <input name="price" placeholder="Price (€)" type="number" value={form.price} onChange={handleChange} required />
+            <select name="type" value={form.type} onChange={handleChange}>
+              <option value="sale">For Sale</option>
+              <option value="rent">For Rent</option>
+              <option value="exchange">Exchange</option>
+            </select>
+          </div>
+
+          <div className="form-row">
+            <input name="bedrooms" placeholder="Bedrooms" type="number" value={form.bedrooms} onChange={handleChange} />
+            <input name="bathrooms" placeholder="Bathrooms" type="number" value={form.bathrooms} onChange={handleChange} />
+          </div>
+
+          <div className="form-row">
+            <input name="sqm" placeholder="Area (m²)" type="number" value={form.sqm} onChange={handleChange} />
+            <input name="yearBuilt" placeholder="Year built" type="number" value={form.yearBuilt} onChange={handleChange} />
+          </div>
 
           <div className="image-upload">
             <label className="image-label">
-              {preview ? "Change Image" : "Upload Image"}
+              {preview ? "Change Image" : "Upload Property Image"}
               <input type="file" accept="image/*" onChange={handleImage} hidden />
             </label>
             {preview && <img src={preview} alt="Preview" className="image-preview" />}
           </div>
 
+          <div>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+              <input
+                placeholder="Add amenity (e.g. Swimming Pool)"
+                value={amenityInput}
+                onChange={(e) => setAmenityInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addAmenity(); } }}
+                style={{ flex: 1 }}
+              />
+              <button type="button" onClick={addAmenity} className="ai-btn" style={{ flex: 'none', padding: '12px 16px' }}>+</button>
+            </div>
+            {amenities.length > 0 && (
+              <div className="amenities-input">
+                {amenities.map((a, i) => (
+                  <span key={i} className="amenity-tag">
+                    {a}
+                    <button type="button" onClick={() => removeAmenity(i)}>&times;</button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
           <textarea
             name="description"
-            placeholder="Description"
+            placeholder="Property description - highlight unique features, finishes, and lifestyle"
             value={form.description}
             onChange={handleChange}
             required
@@ -116,10 +168,10 @@ function AddHouse() {
 
           <div className="buttons">
             <button type="button" className="ai-btn" onClick={handleImprove} disabled={aiLoading}>
-              {aiLoading ? "Improving..." : "Improve"}
+              {aiLoading ? "Improving..." : "AI Enhance"}
             </button>
             <button type="submit" className="submit-btn" disabled={loading}>
-              {loading ? "Adding..." : "Add House"}
+              {loading ? "Publishing..." : "Publish Listing"}
             </button>
           </div>
         </form>

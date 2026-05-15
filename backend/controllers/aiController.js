@@ -32,7 +32,7 @@ const improveDescription = async (req, res) => {
 
     res.json({ improvedDescription });
   } catch (err) {
-    console.log(err.message);
+    console.error('[AI]', err.message);
     res.status(500).json({ message: 'AI service failed, try again later' });
   }
 };
@@ -92,7 +92,7 @@ Example output: {"location":"Amsterdam","type":"rent","maxPrice":1500}`,
 
     res.json({ filters, houses });
   } catch (err) {
-    console.log(err.message);
+    console.error('[AI]', err.message);
     res.status(500).json({ message: 'AI search failed, try again later' });
   }
 };

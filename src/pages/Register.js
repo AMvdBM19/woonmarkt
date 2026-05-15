@@ -36,21 +36,22 @@ function Register() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <h1>Register</h1>
+        <h1>Create Account</h1>
+        <p className="login-subtitle">Join our exclusive property network</p>
 
-        {error && <p style={{ color: "#ef4444" }}>{error}</p>}
+        {error && <p style={{ color: "#ef4444", fontSize: "14px" }}>{error}</p>}
 
         <form onSubmit={handleSubmit}>
           <input
             className="login-input"
-            placeholder="Name"
+            placeholder="Full name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
           />
           <input
             className="login-input"
-            placeholder="Email"
+            placeholder="Email address"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -58,7 +59,7 @@ function Register() {
           />
           <input
             className="login-input"
-            placeholder="Password"
+            placeholder="Password (min 6 characters)"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -66,14 +67,13 @@ function Register() {
           />
 
           <button className="login-btn" disabled={loading}>
-            {loading ? "Registering..." : "Register"}
+            {loading ? "Creating account..." : "Register"}
           </button>
         </form>
 
-        <p style={{ marginTop: "15px" }}>
-          Already have an account? <Link to="/login" style={{ color: "#8b5cf6" }}>Login</Link>
+        <p className="login-link">
+          Already have an account? <Link to="/login">Sign In</Link>
         </p>
-        <p><Link to="/" style={{ color: "#c4b5fd" }}>Back to Home</Link></p>
       </div>
     </div>
   );
