@@ -32,16 +32,17 @@ function NotFound() {
   return (
     <div style={{
       minHeight: "100vh",
-      background: "#1e1b4b",
-      color: "white",
+      background: "var(--bg-dark)",
+      color: "var(--text-white)",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
+      fontFamily: "var(--font-display)",
     }}>
-      <h1>404</h1>
-      <p>Page not found</p>
-      <a href="/" style={{ color: "#8b5cf6", marginTop: "20px" }}>Go Home</a>
+      <h1 style={{ fontSize: "72px", margin: 0, opacity: 0.3 }}>404</h1>
+      <p style={{ color: "var(--text-muted)", marginTop: "12px" }}>This property doesn't exist</p>
+      <a href="/" style={{ color: "var(--primary-light)", marginTop: "24px", fontSize: "14px" }}>Return Home</a>
     </div>
   );
 }

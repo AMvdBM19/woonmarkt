@@ -1,0 +1,96 @@
+.listings-page {
+  min-height: 100vh;
+  background: var(--bg-dark);
+  padding-bottom: 80px;
+}
+
+.listings-header {
+  text-align: center;
+  padding: 80px 20px 40px;
+}
+
+.listings-header h1 {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 500;
+  margin: 0 0 12px;
+}
+
+.listings-header p {
+  color: var(--text-muted);
+  font-size: 16px;
+  margin: 0;
+}
+
+.listings-filters {
+  display: flex;
+  gap: 12px;
+  max-width: 900px;
+  margin: 0 auto 20px;
+  padding: 0 40px;
+}
+
+.listings-filters input,
+.listings-filters select {
+  flex: 1;
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text-white);
+  font-size: 14px;
+  outline: none;
+  transition: var(--transition);
+}
+
+.listings-filters input:focus,
+.listings-filters select:focus {
+  border-color: var(--primary-light);
+}
+
+.listings-filters input::placeholder {
+  color: var(--text-muted);
+}
+
+.listings-filters select option {
+  background: var(--bg-deep);
+}
+
+.listings-count {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.listings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 32px;
+  padding: 20px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.listings-loading,
+.listings-error {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 60px;
+  font-size: 16px;
+}
+
+.listings-error {
+  color: #ef4444;
+}
+
+@media (max-width: 768px) {
+  .listings-filters {
+    flex-direction: column;
+    padding: 0 20px;
+  }
+  .listings-grid {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+}

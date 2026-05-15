@@ -8,19 +8,41 @@ const path = require('path');
 const authRoutes = require('./routes/authRoutes');
 const houseRoutes = require('./routes/houseRoutes');
 const aiRoutes = require('./routes/aiRoutes');
+const mapsRoutes = require('./routes/mapsRoutes');
 
 const app = express();
 
-app.use(cors());
+// CORS Configuration from environment
+const corsOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000').split(',').map(o => o.trim());
+app.use(cors({
+  origin: corsOrigins,
+  credentials: true,
+}));
+
+// Trust proxy (for nginx-proxy-manager)
+app.set('trust proxy', 1);
+
 app.use(express.json());
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/houses', houseRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/maps', mapsRoutes);
 
 const PORT = process.env.PORT || 3001;
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully...');
+  process.exit(0);
+});
 
 mongoose
   .connect(process.env.MONGO_URI)
@@ -31,5 +53,6 @@ mongoose
     });
   })
   .catch((err) => {
-    console.log('Failed to connect to MongoDB:', err.message);
+    console.error('Failed to connect to MongoDB:', err.message);
+    process.exit(1);
   });

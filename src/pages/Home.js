@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { getHouses, aiSearch } from "../api";
 import HouseCard from "../components/HouseCard";
 import "./Home.css";
 
 function Home() {
   const [houses, setHouses] = useState([]);
+  const [featured, setFeatured] = useState([]);
   const [loading, setLoading] = useState(true);
   const [city, setCity] = useState("");
   const [type, setType] = useState("");
@@ -14,9 +16,11 @@ function Home() {
 
   const fetchHouses = (params = {}) => {
     setLoading(true);
-
     getHouses(params)
-      .then((data) => setHouses(data))
+      .then((data) => {
+        setHouses(data);
+        setFeatured(data.filter(h => h.featured));
+      })
       .catch(() => setHouses([]))
       .finally(() => setLoading(false));
   };
@@ -38,6 +42,7 @@ function Home() {
     try {
       const data = await aiSearch(aiQuery);
       setHouses(data.houses);
+      setFeatured([]);
       setAiFilters(data.filters);
     } catch (err) {
       setHouses([]);
@@ -52,69 +57,99 @@ function Home() {
     fetchHouses();
   };
 
+  const displayHouses = aiFilters ? houses : (featured.length > 0 ? featured : houses.slice(0, 6));
+
   return (
     <div className="home">
       <section className="hero">
-        <div className="glow"></div>
+        <div className="hero-bg"></div>
+        <div className="hero-content">
+          <span className="hero-label">Luxury Real Estate</span>
+          <h1>Exceptional Properties for Discerning Buyers</h1>
+          <p>
+            Curated collection of the finest residences across the Netherlands and Europe.
+            From historic canal houses to contemporary architectural masterpieces.
+          </p>
 
-        <h1>Find Your Dream Home</h1>
-        <p>Rent - Buy - Exchange with AI</p>
-
-        <div className="search">
-          <input
-            placeholder="City"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-          />
-
-          <select value={type} onChange={(e) => setType(e.target.value)}>
-            <option value="">All Types</option>
-            <option value="rent">Rent</option>
-            <option value="sale">Sale</option>
-            <option value="exchange">Exchange</option>
-          </select>
-
-          <button onClick={handleSearch}>Search</button>
-        </div>
-
-        <div className="ai-search">
-          <p className="ai-search-label">Or search with AI</p>
-          <div className="ai-search-box">
-            <input
-              placeholder='Try "affordable house in Rotterdam for rent"'
-              value={aiQuery}
-              onChange={(e) => setAiQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleAiSearch()}
-            />
-            <button onClick={handleAiSearch} disabled={aiLoading}>
-              {aiLoading ? "Searching..." : "AI Search"}
-            </button>
-          </div>
-
-          {aiFilters && (
-            <div className="ai-filters">
-              <span>AI found filters: </span>
-              {aiFilters.location && <span className="ai-tag">{aiFilters.location}</span>}
-              {aiFilters.type && <span className="ai-tag">{aiFilters.type}</span>}
-              {aiFilters.minPrice && <span className="ai-tag">Min &euro;{aiFilters.minPrice}</span>}
-              {aiFilters.maxPrice && <span className="ai-tag">Max &euro;{aiFilters.maxPrice}</span>}
-              <button className="ai-clear" onClick={clearAiSearch}>Clear</button>
+          <div className="search-container">
+            <div className="search">
+              <input
+                placeholder="City or location"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              />
+              <select value={type} onChange={(e) => setType(e.target.value)}>
+                <option value="">All Types</option>
+                <option value="sale">For Sale</option>
+                <option value="rent">For Rent</option>
+                <option value="exchange">Exchange</option>
+              </select>
+              <button onClick={handleSearch}>Search</button>
             </div>
-          )}
+
+            <div className="ai-search">
+              <p className="ai-search-label">Or describe what you're looking for</p>
+              <div className="ai-search-box">
+                <input
+                  placeholder='e.g. "Modern penthouse with sea view in Rotterdam"'
+                  value={aiQuery}
+                  onChange={(e) => setAiQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleAiSearch()}
+                />
+                <button onClick={handleAiSearch} disabled={aiLoading}>
+                  {aiLoading ? "Searching..." : "AI Search"}
+                </button>
+              </div>
+
+              {aiFilters && (
+                <div className="ai-filters">
+                  <span>Filters applied: </span>
+                  {aiFilters.location && <span className="ai-tag">{aiFilters.location}</span>}
+                  {aiFilters.type && <span className="ai-tag">{aiFilters.type}</span>}
+                  {aiFilters.minPrice && <span className="ai-tag">From €{aiFilters.minPrice.toLocaleString()}</span>}
+                  {aiFilters.maxPrice && <span className="ai-tag">Up to €{aiFilters.maxPrice.toLocaleString()}</span>}
+                  <button className="ai-clear" onClick={clearAiSearch}>Clear</button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </section>
 
+      <div className="stats-bar">
+        <div className="stat-item">
+          <span className="stat-number">{houses.length}+</span>
+          <span className="stat-label">Properties</span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-number">5</span>
+          <span className="stat-label">Countries</span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-number">€32M</span>
+          <span className="stat-label">Highest Listing</span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-number">24/7</span>
+          <span className="stat-label">Concierge</span>
+        </div>
+      </div>
+
       <section className="section">
-        <h2>Available Homes ({houses.length})</h2>
+        <div className="section-header">
+          <h2>{aiFilters ? "Search Results" : "Featured Properties"}</h2>
+          <Link to="/listings">View All</Link>
+        </div>
 
-        {loading && <p>Loading homes...</p>}
+        {loading && <p className="loading-text">Loading properties...</p>}
 
-        {!loading && houses.length === 0 && (
-          <p>No houses found.</p>
+        {!loading && displayHouses.length === 0 && (
+          <p className="loading-text">No properties found matching your criteria.</p>
         )}
 
         <div className="grid">
-          {houses.map((house) => (
+          {displayHouses.map((house) => (
             <HouseCard key={house._id} house={house} />
           ))}
         </div>

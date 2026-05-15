@@ -16,24 +16,23 @@ function Navbar() {
 
   return (
     <nav className="navbar">
-      <h2>
-        <Link to="/" className="navbar-logo">WoonMarkt</Link>
-      </h2>
+      <Link to="/" className="navbar-logo">
+        Woon<span>markt</span>
+      </Link>
 
       <div className="navbar-links">
         <Link to="/">Home</Link>
-        <Link to="/listings">Listings</Link>
-
-        {loggedIn && <Link to="/add">Add Listing</Link>}
+        <Link to="/listings">Collection</Link>
 
         {loggedIn ? (
           <>
-            <span className="navbar-user">Hi, {user?.name}</span>
+            <Link to="/add">List Property</Link>
+            <span className="navbar-user">{user?.name}</span>
             <span className="navbar-logout" onClick={handleLogout}>Logout</span>
           </>
         ) : (
           <>
-            <Link to="/login">Login</Link>
+            <Link to="/login">Sign In</Link>
             <Link to="/register">Register</Link>
           </>
         )}

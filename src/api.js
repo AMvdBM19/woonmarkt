@@ -1,4 +1,4 @@
-const API_URL = "/api";
+const API_URL = process.env.REACT_APP_API_URL || "/api";
 
 const getToken = () => localStorage.getItem("token");
 
@@ -13,6 +13,11 @@ export const getHouses = async (params = {}) => {
   const query = new URLSearchParams();
   if (params.location) query.append("location", params.location);
   if (params.type) query.append("type", params.type);
+  if (params.city) query.append("city", params.city);
+  if (params.minPrice) query.append("minPrice", params.minPrice);
+  if (params.maxPrice) query.append("maxPrice", params.maxPrice);
+  if (params.bedrooms) query.append("bedrooms", params.bedrooms);
+  if (params.featured) query.append("featured", "true");
 
   const res = await fetch(`${API_URL}/houses?${query.toString()}`);
   if (!res.ok) throw new Error("Failed to fetch houses");
@@ -32,6 +37,16 @@ export const createHouse = async (houseData, imageFile) => {
   formData.append("type", houseData.type);
   formData.append("price", houseData.price);
   formData.append("location", houseData.location);
+
+  if (houseData.bedrooms) formData.append("bedrooms", houseData.bedrooms);
+  if (houseData.bathrooms) formData.append("bathrooms", houseData.bathrooms);
+  if (houseData.sqm) formData.append("sqm", houseData.sqm);
+  if (houseData.yearBuilt) formData.append("yearBuilt", houseData.yearBuilt);
+  if (houseData.amenities) formData.append("amenities", houseData.amenities);
+  if (houseData.address) formData.append("address", houseData.address);
+  if (houseData.coordinates) formData.append("coordinates", houseData.coordinates);
+  if (houseData.images) formData.append("images", houseData.images);
+
   if (imageFile) formData.append("image", imageFile);
 
   const token = getToken();
@@ -52,6 +67,16 @@ export const updateHouse = async (id, houseData, imageFile) => {
   formData.append("type", houseData.type);
   formData.append("price", houseData.price);
   formData.append("location", houseData.location);
+
+  if (houseData.bedrooms) formData.append("bedrooms", houseData.bedrooms);
+  if (houseData.bathrooms) formData.append("bathrooms", houseData.bathrooms);
+  if (houseData.sqm) formData.append("sqm", houseData.sqm);
+  if (houseData.yearBuilt) formData.append("yearBuilt", houseData.yearBuilt);
+  if (houseData.amenities) formData.append("amenities", houseData.amenities);
+  if (houseData.address) formData.append("address", houseData.address);
+  if (houseData.coordinates) formData.append("coordinates", houseData.coordinates);
+  if (houseData.images) formData.append("images", houseData.images);
+
   if (imageFile) formData.append("image", imageFile);
 
   const token = getToken();
@@ -136,4 +161,17 @@ export const aiSearch = async (query) => {
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || "AI search failed");
   return data;
+};
+
+// Google Maps API helpers
+export const getAutocomplete = async (input) => {
+  const res = await fetch(`${API_URL}/maps/autocomplete?input=${encodeURIComponent(input)}`);
+  if (!res.ok) throw new Error("Autocomplete failed");
+  return res.json();
+};
+
+export const getPlaceDetails = async (placeId) => {
+  const res = await fetch(`${API_URL}/maps/place-details?placeId=${encodeURIComponent(placeId)}`);
+  if (!res.ok) throw new Error("Place details failed");
+  return res.json();
 };
